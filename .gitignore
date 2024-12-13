@@ -1,0 +1,4 @@
+testdata
+output
+.nextflow*
+.DS_Store

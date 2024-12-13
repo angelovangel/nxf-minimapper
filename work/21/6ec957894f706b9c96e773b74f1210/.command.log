@@ -1,0 +1,15 @@
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+Traceback (most recent call last):
+  File "/usr/local/bin/create_report", line 8, in <module>
+    sys.exit(main())
+  File "/usr/local/lib/python3.10/dist-packages/igv_reports/report.py", line 530, in main
+    create_report(args)
+  File "/usr/local/lib/python3.10/dist-packages/igv_reports/report.py", line 42, in create_report
+    table = BedTable(variants_file)
+  File "/usr/local/lib/python3.10/dist-packages/igv_reports/bedtable.py", line 13, in __init__
+    featureList = parse(bed_file)
+  File "/usr/local/lib/python3.10/dist-packages/igv_reports/feature.py", line 228, in parse
+    f = getstream(path)
+  File "/usr/local/lib/python3.10/dist-packages/igv_reports/stream.py", line 25, in getstream
+    f = open(file, encoding='UTF-8')
+FileNotFoundError: [Errno 2] No such file or directory: 'bedfile.bed'

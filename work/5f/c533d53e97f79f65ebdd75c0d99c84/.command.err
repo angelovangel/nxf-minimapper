@@ -1,0 +1,11 @@
+WARNING: The requested image's platform (linux/amd64) does not match the detected host platform (linux/arm64/v8) and no specific platform was requested
+[M::mm_idx_gen::0.020*1.68] collected minimizers
+[M::mm_idx_gen::0.024*1.60] sorted minimizers
+[M::main::0.024*1.59] loaded/built the index for 1 target sequence(s)
+[M::mm_mapopt_update::0.025*1.58] mid_occ = 50
+[M::mm_idx_stat] kmer size: 19; skip: 19; is_hpc: 0; #seq: 1
+[M::mm_idx_stat::0.025*1.58] distinct minimizers: 322 (99.38% are singletons); average occurrences: 1.006; average spacing: 10.046; total length: 3255
+[M::worker_pipeline::1.493*2.03] mapped 2938 sequences
+[M::main] Version: 2.28-r1209
+[M::main] CMD: minimap2 -a -x lr:hq sample22.validated.fasta sample22.fastq.gz
+[M::main] Real time: 1.494 sec; CPU: 3.036 sec; Peak RSS: 0.027 GB
