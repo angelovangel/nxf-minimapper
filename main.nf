@@ -1,7 +1,4 @@
-include { validateParameters; paramsSummaryLog; samplesheetToList } from 'plugin/nf-schema'
 
-log.info paramsSummaryLog(workflow)
-validateParameters()
 
 ref_ch = Channel.fromPath(params.ref, type: 'file', checkIfExists: true)
 reads_ch = Channel.fromPath(params.fastq, type: 'any', checkIfExists: true)
