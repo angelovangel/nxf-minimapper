@@ -1,12 +1,10 @@
-if (params.help) {
-    helpMessage()
-    exit(0)
-}
+include { validateParameters; paramsSummaryLog; samplesheetToList } from 'plugin/nf-schema'
 
-
+log.info paramsSummaryLog(workflow)
+validateParameters()
 
 ref_ch = Channel.fromPath(params.ref, type: 'file', checkIfExists: true)
-reads_ch = Channel.fromPath(params.fastq, type: 'file', checkIfExists: true)
+reads_ch = Channel.fromPath(params.fastq, type: 'any', checkIfExists: true)
 
 // evtl convert .dna to fasta, check for valid ref
 process VALIDATE_REF {

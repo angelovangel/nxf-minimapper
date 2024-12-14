@@ -1,0 +1,85 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/angelovangel/nxf-minimapper/master/nextflow_schema.json",
+  "title": "angelovangel/nxf-minimapper pipeline",
+  "workflow_title": "NXF-MINIMAPPER workflow",
+  "description": "Nextflow pipeline to map long reads to reference",
+  "demo_url": "",
+  "url": "https://github.com/angelovangel/nxf-minimapper",
+  "type": "object",
+  "definitions": {
+    "input_output_options": {
+      "title": "Input/output options",
+      "type": "object",
+      "fa_icon": "fas fa-angle-double-right",
+      "description": "Define where the pipeline should find input data and save output data.",
+      "required": ["fastq", "ref"],
+      "properties": {
+        "fastq": {
+          "type": "string",
+          "format": "file-path",
+          "fa_icon": "fas fa-folder-open",
+          "description": "Path to fastq file",
+          "help_text": "Path to fastq file"
+        },
+        "ref": {
+          "type": "string",
+          "format": "file-path",
+          "fa_icon": "fas fa-vials",
+          "mimetype": "csv/xlsx",
+          "description": "Path to reference fasta file",
+          "help_text": "."
+        },
+        "format": {
+          "type": "string",
+          "enum": [
+            "fasta",
+            "genbank",
+            "snapgene",
+            "embl",
+            "xdna"
+          ],
+          "default": "fasta",
+          "fa_icon": "fas fa-server",
+          "description": "Format of the ref file",
+          "help_text": "The file format of the reference file, will be converted to fasta for mapping"
+        },
+        "outdir": {
+          "type": "string",
+          "format": "directory-path",
+          "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
+          "fa_icon": "fas fa-poll",
+          "default": "output"
+        }
+      }
+    },
+    "advanced_options": {
+      "title": "Advanced options",
+      "type": "object",
+      "fa_icon": "fas fa-sliders-h",
+      "description": "Less common options for the pipeline, typically set in a config file.",
+      "help_text": "Additional options for the pipeline, usually not needed.",
+      "properties": {
+        "minimap_args": {
+          "type": "string",
+          "description": "Additional minimap2 arguments",
+          "help_text": "Additional command-line arguments passed to minimap2. Pass these as strings '--param1 value --param2 value'... ",
+          "fa_icon": "fas fa-angle-right"
+        },
+        "help": {
+          "type": "boolean",
+          "description": "Display help text.",
+          "fa_icon": "fas fa-question-circle"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/definitions/input_output_options"
+    },
+    {
+      "$ref": "#/definitions/advanced_options"
+    }
+  ]
+}
