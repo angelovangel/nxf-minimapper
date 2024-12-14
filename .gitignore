@@ -1,4 +1,4 @@
-testdata
+test*
 output
 .nextflow*
 .DS_Store

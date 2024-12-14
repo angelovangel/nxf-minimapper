@@ -10,14 +10,15 @@ reads_ch = Channel.fromPath(params.fastq, type: 'file', checkIfExists: true)
 
 // evtl convert .dna to fasta, check for valid ref
 process VALIDATE_REF {
-    container 'aangeloo/nxf-tgs:latest'
+    //container 'aangeloo/nxf-tgs:latest'
+    publishDir "$params.outdir", mode: 'copy'
 
     input: path(ref)
     output: path("${ref.simpleName}.validated.fasta"), emit: validated_ref_ch
 
     script:
     """
-    seqkit seq -v $ref > ${ref.simpleName}.validated.fasta
+        convert2fasta.py $ref "${params.format}" ${ref.simpleName}.validated.fasta
     """
 }
 
@@ -55,10 +56,16 @@ process IGV {
 
     script:
     """
+    # dynamic calculation for subsampling, subsample for > 500 alignments
+    count=\$(samtools view -c ${bam})
+    percent_aln=\$(samtools flagstat ${bam} | grep 'primary mapped' | cut -d"(" -f 2 | cut -d" " -f1)
+    all_reads=\$(samtools flagstat ${bam} | grep 'primary\$' | cut -d" " -f1)
+    subsample=\$(echo \$count | awk '{if (\$1 <500) {print 1} else {print 500/\$1}}')
+
     # construct bed file
     len=\$(faster2 -l ${ref})
     header=\$(grep ">" ${ref} | cut -c 2-)
-    echo -e "\$header\t0\t\$len\tPrimary alignments: X" > bedfile.bed
+    echo -e "\$header\t0\t\$len\tPrimary alignments: \$percent_aln of \$all_reads reads" > bedfile.bed
 
 
     create_report \
@@ -67,6 +74,7 @@ process IGV {
         --tracks ${bam} \
         --output ${bam.simpleName}.igvreport.html \
         --flanking 200 \
+        --subsample \$subsample
     """
 }
 

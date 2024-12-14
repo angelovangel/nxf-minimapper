@@ -30,6 +30,20 @@
           "description": "Path to reference fasta file",
           "help_text": "."
         },
+        "format": {
+          "type": "string",
+          "enum": [
+            "fasta",
+            "genbank",
+            "snapgene",
+            "embl",
+            "xdna"
+          ],
+          "default": "fasta",
+          "fa_icon": "fas fa-server",
+          "description": "Format of the ref file",
+          "help_text": "The file format of the reference file, will be converted to fasta for mapping"
+        },
         "outdir": {
           "type": "string",
           "format": "directory-path",
