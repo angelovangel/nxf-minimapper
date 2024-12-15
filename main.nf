@@ -35,11 +35,20 @@ log.info """\
     """
     .stripIndent(true)
 
-
 ref_ch = Channel.fromPath(params.ref, type: 'file', checkIfExists: true)
-reads_ch = Channel.fromPath(params.fastq, type: 'any', checkIfExists: true)
 
-// evtl convert .dna to fasta, check for valid ref
+// want to have either a single fastq file or a directory with fastq files as a query
+// this is "path" in the schema to allow selecting both file and dir in EPI2ME
+// the channel emits files only
+myfile = file(params.fastq)
+mypattern = "*.{fastq,fastq.gz,fq,fq.gz}"
+
+if ( myfile.isDirectory() ) {
+    reads_ch = Channel.fromPath(params.fastq + mypattern, type: 'file', checkIfExists: true)
+} else {
+    reads_ch = Channel.fromPath(params.fastq, type: 'file', checkIfExists: true)
+}
+
 process VALIDATE_REF {
     container 'pegi3s/biopython:latest'
     publishDir "$params.outdir", mode: 'copy'
@@ -53,15 +62,16 @@ process VALIDATE_REF {
     """
 }
 
-// // do actual mapping
+
 process MINIMAP {
     container 'aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir", mode: 'copy'
 
-    input:
-        path(ref)
-        path(fastq)
-    output: path("*.{bam,bai}"), emit: bam_ch
+    input: 
+        tuple path(ref), path(fastq)
+
+    output: 
+        path("*.{bam,bai}"), emit: bam_ch
 
     script:
     """
@@ -74,7 +84,7 @@ process MINIMAP {
     """
 }
 
-// generate IGV report
+
 process IGV {
     container 'aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir", mode: 'copy'
@@ -111,7 +121,9 @@ process IGV {
 
 workflow {
     VALIDATE_REF(ref_ch)
-    MINIMAP(VALIDATE_REF.out.validated_ref_ch, reads_ch)
+    VALIDATE_REF.out.validated_ref_ch \
+    .combine(reads_ch)
+    | MINIMAP
     
     VALIDATE_REF.out.validated_ref_ch \
     .combine(MINIMAP.out.bam_ch) \

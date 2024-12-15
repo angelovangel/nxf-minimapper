@@ -17,19 +17,17 @@
       "properties": {
         "fastq": {
           "type": "string",
-          "format": "directory-path",
+          "format": "path",
           "fa_icon": "fas fa-folder-open",
-          "description": "Path to raw ONT fastq data (fastq_pass)",
-          "default": "fastq"
+          "description": "Select a fastq file or a directory with fastq files"
         },
         "ref": {
           "type": "string",
           "format": "file-path",
           "fa_icon": "fas fa-vials",
           "mimetype": "fa/fasta/gbk/genbank/dna/embl",
-          "description": "Path to reference sequence",
-          "help_text": "",
-          "default": "reference.fasta"
+          "description": "Select file with reference sequence",
+          "help_text": "Long help text"
         },
         "format": {
           "type": "string",
