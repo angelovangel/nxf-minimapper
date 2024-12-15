@@ -1,43 +1,54 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/angelovangel/nxf-minimapper//nextflow_schema.json",
-  "title": "angelovangel/nxf-minimapper pipeline parameters",
-  "description": "Map long reads to reference",
+  "$id": "https://raw.githubusercontent.com/angelovangel/nxf-minimapper/master/nextflow_schema.json",
+  "title": "angelovangel/nxf-minimapper pipeline",
+  "workflow_title": "NXF-MINIMAPPER",
+  "description": "Map long reads to reference, mainly for plasmid/amplicon verification",
+  "demo_url": "https://github.com/angelovangel/nxf-tgs/releases/download/v0.1.6/nxf-tgs-demo.tar.gz",
+  "url": "https://github.com/angelovangel/nxf-minimapper",
   "type": "object",
-  "$defs": {
+  "definitions": {
     "input_output_options": {
       "title": "Input/output options",
       "type": "object",
-      "fa_icon": "fas fa-terminal",
+      "fa_icon": "fas fa-angle-double-right",
       "description": "Define where the pipeline should find input data and save output data.",
-      "required": ["ref", "format", "fastq"],
+      "required": ["fastq", "ref", "format"],
       "properties": {
+        "fastq": {
+          "type": "string",
+          "format": "directory-path",
+          "fa_icon": "fas fa-folder-open",
+          "description": "Path to raw ONT fastq data (fastq_pass)",
+          "default": "fastq"
+        },
         "ref": {
           "type": "string",
-          "default": "reference.fasta",
-          "fa_icon": "fas fa-redo",
           "format": "file-path",
-          "description": "File with reference sequence to align to"
+          "fa_icon": "fas fa-vials",
+          "mimetype": "fa/fasta/gbk/genbank/dna/embl",
+          "description": "Path to reference sequence",
+          "help_text": "",
+          "default": "reference.fasta"
         },
         "format": {
           "type": "string",
+          "enum": [
+            "fasta",
+            "genbank",
+            "embl",
+            "snapgene"
+          ],
           "default": "fasta",
-          "fa_icon": "fas fa-info",
-          "enum": ["fasta", "genbank", "embl", "snapgene"],
-          "description": "Sequence format of the reference"
-        },
-        "fastq": {
-          "type": "string",
-          "default": "reads.fastq",
-          "fa_icon": "fas fa-copy",
-          "format": "path",
-          "description": "Path to fastq file or a directory with fastq files"
+          "fa_icon": "fas fa-server",
+          "description": "File format of reference",
+          "help_text": ""
         },
         "outdir": {
           "type": "string",
           "format": "directory-path",
           "description": "The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.",
-          "fa_icon": "fas fa-folder-open",
+          "fa_icon": "fas fa-poll",
           "default": "output"
         }
       }
@@ -45,22 +56,30 @@
     "advanced_options": {
       "title": "Advanced options",
       "type": "object",
-      "description": "Additional options",
-      "default": "",
+      "fa_icon": "fas fa-sliders-h",
+      "description": "Less common options for the pipeline, typically set in a config file.",
+      "help_text": "Additional options for the pipeline, usually not needed.",
       "properties": {
         "minimap_args": {
           "type": "string",
-          "description": "Additional arguments passed to minimap2"
+          "description": "Additional minimap2 arguments",
+          "help_text": "Additional command-line arguments passed to minimap2. Pass these as strings '--param1 value --param2 value'... ",
+          "fa_icon": "fas fa-angle-right"
+        },
+        "help": {
+          "type": "boolean",
+          "description": "Display help text.",
+          "fa_icon": "fas fa-question-circle"
         }
       }
     }
   },
   "allOf": [
     {
-      "$ref": "#/$defs/input_output_options"
+      "$ref": "#/definitions/input_output_options"
     },
     {
-      "$ref": "#/$defs/advanced_options"
+      "$ref": "#/definitions/advanced_options"
     }
   ]
 }
