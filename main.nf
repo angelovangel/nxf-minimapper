@@ -58,7 +58,7 @@ process VALIDATE_REF {
 
     script:
     """
-        convert2fasta.py $ref "${params.format}" ${ref.simpleName}.reference.fasta
+    convert2fasta.py $ref "${params.format}" ${ref.simpleName}.reference.fasta
     """
 }
 
@@ -67,11 +67,8 @@ process MINIMAP {
     container 'aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir", mode: 'copy'
 
-    input: 
-        tuple path(ref), path(fastq)
-
-    output: 
-        path("*.{bam,bai}"), emit: bam_ch
+    input: tuple path(ref), path(fastq)
+    output: path("*.{bam,bai}"), emit: bam_ch
 
     script:
     """
@@ -82,6 +79,35 @@ process MINIMAP {
         | samtools sort -o ${fastq.simpleName}.bam -
     samtools index ${fastq.simpleName}.bam
     """
+}
+
+// get coverage statistics for all samples that were mapped to ref
+process COVERAGE_STATS {
+    container 'aangeloo/nxf-tgs:latest'
+    //publishDir "$params.outdir", mode: 'copy'
+
+    input: path(bam)
+    output: path("coverage.tsv"), emit: coverage_ch
+
+    script:
+    sample = bam.simpleName
+    """
+    samtools coverage -H ${bam} | awk '{print "$sample\t" \$0}' - > coverage.tsv
+    """
+}
+
+process COVERAGE_SUMMARY {
+    container 'aangeloo/nxf-tgs:latest'
+    publishDir "$params.outdir", mode: 'copy'
+
+    input:  path("coverage*.tsv")
+    output: path("00-alignment-summary*")
+
+    script:
+    """
+    coverage_summary.R "*.tsv" $workflow.runName
+    """
+
 }
 
 
@@ -121,11 +147,24 @@ process IGV {
 
 workflow {
     VALIDATE_REF(ref_ch)
+    
     VALIDATE_REF.out.validated_ref_ch \
     .combine(reads_ch)
     | MINIMAP
-    
+
     VALIDATE_REF.out.validated_ref_ch \
     .combine(MINIMAP.out.bam_ch) \
     | IGV
+
+    MINIMAP.out.bam_ch
+    .flatten()
+    .filter( ~/.*bam$/ )
+    //.view()
+    | COVERAGE_STATS
+    
+    COVERAGE_STATS.out.coverage_ch
+    .collect()
+    //.view()
+    | COVERAGE_SUMMARY
+    
 }
