@@ -30,8 +30,8 @@ log.info """\
     fastq           : ${params.fastq}
     ref             : ${params.ref}
     format          : ${params.format}
-    minimap_args    : ${params.minimap_args}
     outdir          : ${params.outdir}
+    minimap_args    : ${params.minimap_args}
     """
     .stripIndent(true)
 
@@ -44,7 +44,7 @@ myfile = file(params.fastq)
 mypattern = "*.{fastq,fastq.gz,fq,fq.gz}"
 
 if ( myfile.isDirectory() ) {
-    reads_ch = Channel.fromPath(params.fastq + mypattern, type: 'file', checkIfExists: true)
+    reads_ch = Channel.fromPath(params.fastq + "/" + mypattern, type: 'file', checkIfExists: true)
 } else {
     reads_ch = Channel.fromPath(params.fastq, type: 'file', checkIfExists: true)
 }
@@ -54,11 +54,11 @@ process VALIDATE_REF {
     publishDir "$params.outdir", mode: 'copy'
 
     input: path(ref)
-    output: path("${ref.simpleName}.validated.fasta"), emit: validated_ref_ch
+    output: path("${ref.simpleName}.reference.fasta"), emit: validated_ref_ch
 
     script:
     """
-        convert2fasta.py $ref "${params.format}" ${ref.simpleName}.validated.fasta
+        convert2fasta.py $ref "${params.format}" ${ref.simpleName}.reference.fasta
     """
 }
 

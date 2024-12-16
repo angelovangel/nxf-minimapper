@@ -19,15 +19,16 @@
           "type": "string",
           "format": "path",
           "fa_icon": "fas fa-folder-open",
-          "description": "Select a fastq file or a directory with fastq files"
+          "description": "A fastq file or a directory with fastq files",
+          "help_text": "Select either one fastq file or a directory with fastq files that are to be aligned to the reference."
         },
         "ref": {
           "type": "string",
           "format": "file-path",
           "fa_icon": "fas fa-vials",
           "mimetype": "fa/fasta/gbk/genbank/dna/embl",
-          "description": "Select file with reference sequence",
-          "help_text": "Long help text"
+          "description": "Reference sequence file",
+          "help_text": "Select one file with reference sequence, please see the supported formats below."
         },
         "format": {
           "type": "string",
@@ -40,7 +41,7 @@
           "default": "fasta",
           "fa_icon": "fas fa-server",
           "description": "File format of reference",
-          "help_text": ""
+          "help_text": "Choose the file format of the reference sequence. Please choose the correct format, we do not try to guess it."
         },
         "outdir": {
           "type": "string",
