@@ -65,7 +65,7 @@ process VALIDATE_REF {
 
 process MINIMAP {
     container 'aangeloo/nxf-tgs:latest'
-    publishDir "$params.outdir", mode: 'copy'
+    publishDir "$params.outdir/00-bam/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
     output: path("*.{bam,bai}"), emit: bam_ch
