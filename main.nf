@@ -51,7 +51,7 @@ if ( myfile.isDirectory() ) {
 
 process VALIDATE_REF {
     container 'pegi3s/biopython:latest'
-    publishDir "$params.outdir", mode: 'copy'
+    publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: path(ref)
     output: path("${ref.simpleName}.reference.fasta"), emit: validated_ref_ch
@@ -65,7 +65,7 @@ process VALIDATE_REF {
 
 process MINIMAP {
     container 'aangeloo/nxf-tgs:latest'
-    publishDir "$params.outdir/00-bam/", mode: 'copy'
+    publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
     output: path("*.{bam,bai}"), emit: bam_ch
