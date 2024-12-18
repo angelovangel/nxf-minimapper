@@ -91,13 +91,15 @@ process COVERAGE_STATS {
 
     script:
     sample = bam.simpleName
-    // data.table is in the docker image, can be used for having list cols in df
+    
     // record samtools depth as list col with "|" sep2 in coverage.tsv
     """
-    # determine sampling nth so that approx 200 points are collected for sparkline depth of coverage
+    # determine sampling nth so that approx 300 points are collected for sparkline depth of coverage
+    endpos=\$(samtools coverage -H ${bam} | cut -f3)
+    nth=\$(awk -v var="\$endpos" 'BEGIN {print int(var / 300) }')
     
     samtools coverage -H ${bam} | awk '{print "$sample\t" \$0}' - > coverage
-    samtools depth -aa ${bam} | awk 'NR % 20 == 0' - | cut -f3 | tr '\n' '|' > depth
+    samtools depth -aa ${bam} | awk -v var="\$nth" 'NR % var == 0' - | cut -f3 | tr '\n' '|' > depth
     paste -d "\t" coverage depth > coverage.tsv
     """
 }
