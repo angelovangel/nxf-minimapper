@@ -17,15 +17,20 @@ tsvfiles <- list.files(pattern = arg[1], full.names = T)
 cols <- c(
     "qname", "rname", "startpos", "endpos", "numreads", "covbases", "coverage", "meandepth", "meanbaseq", "meanmapq", "cov_depth" 
 )
-df <- vroom(file = tsvfiles, delim = "\t", col_names = cols, col_select = -c('startpos', 'endpos'))
-df2 <- df %>%
+
+df <- vroom(file = tsvfiles, delim = "\t", col_names = cols) #col_select = -c('startpos', 'endpos'))
+refsize <- df$endpos[1]
+
+df2 <- df %>% 
+  dplyr::select(-c('startpos', 'endpos')) %>%
   group_by(qname) %>%
   mutate(
     cov_depth = spk_chr(
       str_split(cov_depth, "\\|") %>% unlist() %>% 
         #str_replace(pattern = "^0$", replacement = "null") %>% 
         head(-1), # remove last element because it is "". This comes from `tr "\n" "|"` 
-      width = 300, height = 40, lineColor = 'black', fillColor = '#e5f5e0', lineWidth = 1.5, chartRangeMin = 0
+      width = 300, height = 40, lineColor = 'black', fillColor = '#e5f5e0', lineWidth = 1.5, chartRangeMin = 0,
+      tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> {{prefix}}pos: {{x}} depth: {{y}} {{suffix}}</span>"
       )
     )
 
@@ -49,7 +54,11 @@ finaltable <-
     # caption = paste0("Run name: ", arg[2], " | Time: ", format.POSIXct(Sys.time())),
     caption = htmltools::tags$caption(
       style = 'caption-side: bottom; text-align: left; color: grey;',
-      paste0(arg[2], " | ", format.POSIXct(Sys.time()))
+      htmltools::HTML(
+        "Ref size: <b>", refsize, 
+        "bp </b><br/>Run id:&nbsp&nbsp <b>", arg[2],
+        "</b><br/>Date:&nbsp&nbsp&nbsp&nbsp&nbsp <b>", format.POSIXct(Sys.time(), format = "%Y-%m-%d")
+        )
     ),
     # style = 'bootstrap',
     escape = F, filter = 'top',

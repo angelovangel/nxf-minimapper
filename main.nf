@@ -99,7 +99,7 @@ process COVERAGE_STATS {
     nth=\$(awk -v var="\$endpos" 'BEGIN {print int(var / 300) }')
     
     samtools coverage -H ${bam} | awk '{print "$sample\t" \$0}' - > coverage
-    samtools depth -aa ${bam} | awk -v var="\$nth" 'NR % var == 0' - | cut -f3 | tr '\n' '|' > depth
+    samtools depth -aa ${bam} | awk -v var="\$nth" 'NR % var == 0' - | cut -f2,3 | tr '\n' '|' | tr '\t' ':' > depth
     paste -d "\t" coverage depth > coverage.tsv
     """
 }
