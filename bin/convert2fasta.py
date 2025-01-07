@@ -15,12 +15,17 @@ out_file = sys.argv[3]
 basename = os.path.basename(in_file).split('.', 1)[0]
 n = 0
 
-# do not rely on valid accession/header, take file name
-# SeqIO.convert(in_file, in_format, out_file, "fasta")
+# do not rely on valid accession/header, take file name as id
+# only one record is supported
+rec = SeqIO.read(in_file, in_format)
+# id = rec.id
+seq = rec.seq
+record = SeqRecord(seq, id = basename, description = "")
+SeqIO.write(record, out_file, "fasta")
 
-for record in SeqIO.parse(in_file, in_format):
-    n += 1
-    id = record.id
-    seq = record.seq
-    record = SeqRecord(seq, id = basename + "_" + str(n), description = "")
-    SeqIO.write(record, out_file, "fasta")
+# for record in SeqIO.parse(in_file, in_format):
+#     n += 1
+#     id = record.id
+#     seq = record.seq
+#     record = SeqRecord(seq, id = basename + "_" + str(n), description = "")
+#     SeqIO.write(record, out_file, "fasta")

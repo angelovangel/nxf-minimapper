@@ -14,10 +14,11 @@ def helpMessage() {
     Parameters:
     -----------------------------------
     fastq         : path to a fastq file or a directory of fastq files to be mapped to the reference
-    ref           : path to a reference file
+    ref           : path to a reference file, containing one sequence record
     format        : file format of reference (one of 'fasta', 'genbank', 'embl', 'snapgene')
     minimap_args  : additional command-line arguments passed to minimap2, pass these as strings '--param1 value --param2 value'...
     outdir        : where to save results, default is 'output'
+    variants      : whether to include variants in the IGV reports, default is false
     """
     .stripIndent(true)
 }
@@ -32,6 +33,7 @@ log.info """\
     format          : ${params.format}
     outdir          : ${params.outdir}
     minimap_args    : ${params.minimap_args}
+    variants        : ${params.variants}
     """
     .stripIndent(true)
 
@@ -81,6 +83,20 @@ process MINIMAP {
     """
 }
 
+process MEDAKA_VARIANT {
+    container 'ontresearch/medaka:latest'
+    publishDir "$params.outdir/02-variants/", mode: 'copy'
+
+    input: tuple path(ref), path(fastq)
+    output: path("*variants.{vcf,vcf.gz}"), emit: vcf_ch
+
+    script:
+    """
+    medaka_variant -i $fastq -r $ref 
+    mv medaka/medaka.annotated.vcf ${fastq.simpleName}.variants.vcf
+    """
+}
+
 // get coverage statistics for all samples that were mapped to ref
 process COVERAGE_STATS {
     container 'aangeloo/nxf-tgs:latest'
@@ -121,15 +137,17 @@ process COVERAGE_SUMMARY {
 
 process IGV {
     container 'aangeloo/nxf-tgs:latest'
-    publishDir "$params.outdir", mode: 'copy'
+    publishDir "$params.outdir/01-igv-reports/", mode: 'copy'
     
     input: 
     tuple path(ref), path(bam), path(bai)
+    path(vcf) // optional input
     
     output:
     path "*.igvreport.html"
 
     script:
+    def vcf_track = params.variants ? "$vcf" : ""
     """
     # dynamic calculation for subsampling, subsample for > 500 alignments
     count=\$(samtools view -c ${bam})
@@ -146,23 +164,30 @@ process IGV {
     create_report \
         bedfile.bed \
         --fasta ${ref} \
-        --tracks ${bam} \
+        --tracks ${vcf_track} ${bam} \
         --output ${bam.simpleName}.igvreport.html \
         --flanking 200 \
         --subsample \$subsample
     """
 }
 
-workflow {
+workflow collect_data {
     VALIDATE_REF(ref_ch)
-    
-    VALIDATE_REF.out.validated_ref_ch \
-    .combine(reads_ch)
-    | MINIMAP
 
-    VALIDATE_REF.out.validated_ref_ch \
+    emit:
+    ref = VALIDATE_REF.out.validated_ref_ch
+    data = VALIDATE_REF.out.validated_ref_ch.combine(reads_ch)
+}
+
+workflow {
+    collect_data()
+    collect_data.out.data \
+    | (MINIMAP & MEDAKA_VARIANT) 
+
+    minimap_ch = collect_data.out.ref \
     .combine(MINIMAP.out.bam_ch) \
-    | IGV
+    
+    IGV(minimap_ch, MEDAKA_VARIANT.out.vcf_ch)
 
     MINIMAP.out.bam_ch
     .flatten()
@@ -174,5 +199,5 @@ workflow {
     .collect()
     //.view()
     | COVERAGE_SUMMARY
-    
+
 }

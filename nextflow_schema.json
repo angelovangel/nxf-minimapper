@@ -28,7 +28,7 @@
           "fa_icon": "fas fa-vials",
           "mimetype": "fa/fasta/gbk/genbank/dna/embl",
           "description": "Reference sequence file",
-          "help_text": "Select one file with reference sequence, please see the supported formats below."
+          "help_text": "Select a file with reference sequence (one record), please see the supported formats below."
         },
         "format": {
           "type": "string",
@@ -64,6 +64,11 @@
           "description": "Additional minimap2 arguments",
           "help_text": "Additional command-line arguments passed to minimap2. Pass these as strings '--param1 value --param2 value'... ",
           "fa_icon": "fas fa-angle-right"
+        },
+        "variants": {
+          "type": "boolean",
+          "description": "Include variants detected with medaka in the IGV reports",
+          "fa_icon": "fas fa-question-circle"
         },
         "help": {
           "type": "boolean",

@@ -1,17 +1,22 @@
 # nxf-minimapper
 Nextflow pipeline to map long reads to a reference. Mainly for use in plasmid or amplicon verification.
-The pipeline accepts a reference file (many file formats are supported) and either:
+The pipeline accepts a reference file containing one record and either:
 - a fastq file or 
 - a directory of fastq files
   
-It is assumed that each file cotains the reads from one sample that are to be mapped to the reference. It performs alignment of the reads to the reference using `minimap2`, and 
+It is assumed that each sequence file cotains the reads from one sample that are to be mapped to the reference. It performs alignment of the reads to the reference using `minimap2`, and 
 generates an Integrated Genomic Viewer html report. The resulting alignments (`bam` files) can be also visualized in 
-standalone IGV or other software.
+standalone IGV or other software.  
+Supported reference file formats:
+ - fasta
+ - genbank
+ - EMBL
+ - Snapgene
 
 ## Running the pipeline
 Only `nextflow ` and `docker` are needed. The pipeline can be run from the command line
 ```bash
-nextflow run angelovangel/nxf-minimapper --ref reference.dna --ref_format snapgene --fastq sample1.fastq
+nextflow run angelovangel/nxf-minimapper --ref reference.dna --format snapgene --fastq sample1.fastq
 ```
 
 The pipeline can also be imported in EPI2ME and run there. For this, [install EPI2ME](https://labs.epi2me.io/epi2me-docs/quickstart/) and import the pipeline using this link:  
