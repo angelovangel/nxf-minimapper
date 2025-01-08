@@ -4,7 +4,7 @@
   "title": "angelovangel/nxf-minimapper pipeline",
   "workflow_title": "NXF-MINIMAPPER",
   "description": "Map long reads to reference, mainly for plasmid/amplicon verification",
-  "demo_url": "https://github.com/angelovangel/nxf-minimapper/releases/download/v0.1.6/nxf-minimapper-demo.tar.gz",
+  "demo_url": "https://github.com/angelovangel/nxf-minimapper/releases/download/v0.2.1/nxf-minimapper-demo.tar.gz",
   "url": "https://github.com/angelovangel/nxf-minimapper",
   "type": "object",
   "definitions": {
