@@ -140,8 +140,7 @@ process IGV {
     publishDir "$params.outdir/01-igv-reports/", mode: 'copy'
     
     input: 
-    tuple path(ref), path(bam), path(bai)
-    path(vcf) // optional input
+    tuple val(sample), path(bam), path(vcf), path(ref)
     
     output:
     path "*.igvreport.html"
@@ -150,9 +149,9 @@ process IGV {
     def vcf_track = params.variants ? "$vcf" : ""
     """
     # dynamic calculation for subsampling, subsample for > 500 alignments
-    count=\$(samtools view -c ${bam})
-    percent_aln=\$(samtools flagstat ${bam} | grep 'primary mapped' | cut -d"(" -f 2 | cut -d" " -f1)
-    all_reads=\$(samtools flagstat ${bam} | grep 'primary\$' | cut -d" " -f1)
+    count=\$(samtools view -c ${bam[0]})
+    percent_aln=\$(samtools flagstat ${bam[0]} | grep 'primary mapped' | cut -d"(" -f 2 | cut -d" " -f1)
+    all_reads=\$(samtools flagstat ${bam[0]} | grep 'primary\$' | cut -d" " -f1)
     subsample=\$(echo \$count | awk '{if (\$1 <500) {print 1} else {print 500/\$1}}')
 
     # construct bed file
@@ -160,34 +159,42 @@ process IGV {
     header=\$(grep ">" ${ref} | cut -c 2-)
     echo -e "\$header\t0\t\$len\tShowing \$subsample fraction of \$all_reads alignments" > bedfile.bed
 
+    # add vcf to bed file
+    if [ -n "$vcf_track" ]; then
+        vcf2bed.py -i $vcf -o vcf.bed
+        head -n 10 vcf.bed >> bedfile.bed
+    fi
 
     create_report \
         bedfile.bed \
         --fasta ${ref} \
-        --tracks ${vcf_track} ${bam} \
-        --output ${bam.simpleName}.igvreport.html \
+        --tracks ${vcf_track} ${bam[0]} \
+        --output ${sample}.igvreport.html \
         --flanking 200 \
         --subsample \$subsample
     """
 }
 
-workflow collect_data {
+workflow {
     VALIDATE_REF(ref_ch)
 
-    emit:
-    ref = VALIDATE_REF.out.validated_ref_ch
-    data = VALIDATE_REF.out.validated_ref_ch.combine(reads_ch)
-}
-
-workflow {
-    collect_data()
-    collect_data.out.data \
+    VALIDATE_REF.out.validated_ref_ch
+    .combine(reads_ch) \
     | (MINIMAP & MEDAKA_VARIANT) 
 
-    minimap_ch = collect_data.out.ref \
-    .combine(MINIMAP.out.bam_ch) \
+    MINIMAP.out.bam_ch \
+    .map{ [ it.toString().split("/").last().split("\\.")[0], it ] } //make keys for join
+    .set { minimap_ch }
     
-    IGV(minimap_ch, MEDAKA_VARIANT.out.vcf_ch)
+    MEDAKA_VARIANT.out.vcf_ch \
+    .map{ [ it.toString().split("/").last().split("\\.")[0], it ] } //make keys for join
+    .set { medaka_ch }
+
+    minimap_ch \
+    .join(medaka_ch, by: 0) \
+    .combine(VALIDATE_REF.out.validated_ref_ch) // validated_ref is always 1 file
+    //.view()
+    | IGV
 
     MINIMAP.out.bam_ch
     .flatten()
