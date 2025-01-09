@@ -55,9 +55,9 @@ finaltable <-
     caption = htmltools::tags$caption(
       style = 'caption-side: bottom; text-align: left; color: grey;',
       htmltools::HTML(
-        "Ref size: <b>", refsize, 
-        "bp </b><br/>Run id:&nbsp&nbsp <b>", arg[2],
-        "</b><br/>Date:&nbsp&nbsp&nbsp&nbsp&nbsp <b>", format.POSIXct(Sys.time(), format = "%Y-%m-%d")
+        "Ref size: <i>", refsize, 
+        "bp </i><br/>Run id:&nbsp&nbsp <i>", arg[2],
+        "</i><br/>Date:&nbsp&nbsp&nbsp&nbsp&nbsp <i>", format.POSIXct(Sys.time(), format = "%Y-%m-%d")
         )
     ),
     # style = 'bootstrap',
@@ -80,4 +80,4 @@ finaltable <-
   spk_add_deps()
 
 #write.csv(df, file = '00-alignment-summary.tsv', sep = '\t', row.names = F, col.names = T)
-DT::saveWidget(finaltable, '00-alignment-summary.html')
+DT::saveWidget(finaltable, file = '00-alignment-summary.html', title = "minimapper-summary")

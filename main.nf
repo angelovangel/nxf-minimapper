@@ -182,6 +182,17 @@ workflow {
     .combine(reads_ch) \
     | (MINIMAP & MEDAKA_VARIANT) 
 
+    MINIMAP.out.bam_ch
+    .flatten()
+    .filter( ~/.*bam$/ )
+    //.view()
+    | COVERAGE_STATS
+    
+    COVERAGE_STATS.out.coverage_ch
+    .collect()
+    //.view()
+    | COVERAGE_SUMMARY
+
     MINIMAP.out.bam_ch \
     .map{ [ it.toString().split("/").last().split("\\.")[0], it ] } //make keys for join
     .set { minimap_ch }
@@ -195,16 +206,5 @@ workflow {
     .combine(VALIDATE_REF.out.validated_ref_ch) // validated_ref is always 1 file
     //.view()
     | IGV
-
-    MINIMAP.out.bam_ch
-    .flatten()
-    .filter( ~/.*bam$/ )
-    //.view()
-    | COVERAGE_STATS
-    
-    COVERAGE_STATS.out.coverage_ch
-    .collect()
-    //.view()
-    | COVERAGE_SUMMARY
 
 }
