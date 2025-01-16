@@ -23,10 +23,13 @@ The pipeline can also be imported in EPI2ME and run there. For this, [install EP
 `https://github.com/angelovangel/nxf-minimapper` 
 
 ## Output
-Results are saved in a folder named `output`. A `bam` file is generated for every sample (in `output/00-alignments`) that can be opened in IGV. Also, an alignment summary and IGV report html files are generated. To open the alignments in IGV:
+Results are saved in a folder named `output`. 
+A `bam` file is generated for every sample (in `output/00-alignments`) that can be opened in IGV. 
+Also, an alignment summary and IGV report html files are generated. To open the alignments in IGV:
  - install IGV for your platform (https://igv.org/doc/desktop/#DownloadPage/) 
  - open reference file - `Genomes` - `Load genome from File` - select the reference.fasta file from `output/00-alignments`
  - open alignment - `File` - `Load from File` - select one or more `bam` files
-  
+
+The consensus of the alignment is also available under `00-alignments`.
 If you use EPI2ME, all the reports are visible directly there under `Reports`.
 

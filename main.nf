@@ -97,6 +97,21 @@ process MEDAKA_VARIANT {
     """
 }
 
+process MEDAKA_CONSENSUS {
+    container 'ontresearch/medaka:latest'
+    publishDir "$params.outdir/00-alignments/", mode: 'copy'
+
+    input: tuple path(ref), path(fastq)
+    output: path("*consensus.fastq")
+
+    script:
+    """
+    # fill gaps with N in consensus
+    medaka_consensus -r N -q -i $fastq -d $ref 
+    mv medaka/consensus.fastq ${fastq.simpleName}.consensus.fastq
+    """
+}
+
 // get coverage statistics for all samples that were mapped to ref
 process COVERAGE_STATS {
     container 'aangeloo/nxf-tgs:latest'
@@ -180,7 +195,7 @@ workflow {
 
     VALIDATE_REF.out.validated_ref_ch
     .combine(reads_ch) \
-    | (MINIMAP & MEDAKA_VARIANT) 
+    | (MINIMAP & MEDAKA_VARIANT & MEDAKA_CONSENSUS) 
 
     MINIMAP.out.bam_ch
     .flatten()
