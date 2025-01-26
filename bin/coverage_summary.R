@@ -27,9 +27,9 @@ df2 <- df %>%
   mutate(
     cov_depth = spk_chr(
       str_split(cov_depth, "\\|") %>% unlist() %>% 
-        #str_replace(pattern = "^0$", replacement = "null") %>% 
+        #str_replace(pattern = ".*:0$", replacement = ":null") %>% # replace 0 with null so that no line is drawn
         head(-1), # remove last element because it is "". This comes from `tr "\n" "|"` 
-      width = 300, height = 40, lineColor = 'black', fillColor = '#e5f5e0', lineWidth = 1.5, chartRangeMin = 0,
+      width = 400, height = 40, lineColor = '#566573', fillColor = '#e5f5e0', lineWidth = 2.0, chartRangeMin = 0,
       tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> {{prefix}}pos: {{x}} depth: {{y}} {{suffix}}</span>"
       )
     )
@@ -50,7 +50,7 @@ locale <- list(locale = "en_US", numeric = TRUE)
 finaltable <- 
   DT::datatable(
     dplyr::arrange(df2, stringi::stri_rank(qname, opts_collator = locale)),
-    class = 'compact',
+    class = 'row-border hover',
     # caption = paste0("Run name: ", arg[2], " | Time: ", format.POSIXct(Sys.time())),
     caption = htmltools::tags$caption(
       style = 'caption-side: bottom; text-align: left; color: grey;',
