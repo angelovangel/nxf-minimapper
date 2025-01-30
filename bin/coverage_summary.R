@@ -22,12 +22,12 @@ cols <- c(
 make_spk <- function(x,y) {
   sp1 <- sparkline(
     str_split(x, "\\|") %>% unlist() %>% head(-1),
-    width = 400, height = 40, lineColor = '#2b83ba', fillColor = "#d6eaf8", lineWidth = 2.0, chartRangeMin = 0,
+    width = 450, height = 43, lineColor = '#2b83ba', fillColor = "#d6eaf8", lineWidth = 2.0, chartRangeMin = 0,
     tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> {{prefix}}pos: {{x}} depth: {{y}} {{suffix}}</span>"
   )
   sp2 <- sparkline(
     str_split(y, "\\|") %>% unlist() %>% head(-1),
-    width = 400, height = 40, lineColor = '#d7191c', fillColor = FALSE, lineWidth = 2.0, chartRangeMin = 0,
+    width = 450, height = 43, lineColor = '#d7191c', fillColor = FALSE, lineWidth = 2.0, chartRangeMin = 0,
     tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> {{prefix}}pos: {{x}} cons_q: {{y}} {{suffix}}</span>"
   )
   sl <- spk_composite(sp1, sp2)
@@ -69,18 +69,19 @@ locale <- list(locale = "en_US", numeric = TRUE)
 finaltable <- 
   DT::datatable(
     dplyr::arrange(df2, stringi::stri_rank(qname, opts_collator = locale)),
-    class = 'row-border hover',
+    class = 'row-border',
     # caption = paste0("Run name: ", arg[2], " | Time: ", format.POSIXct(Sys.time())),
     caption = htmltools::tags$caption(
-      style = 'caption-side: bottom; text-align: left; color: grey;',
+      style = 'caption-side: top; text-align: left; color: grey;',
       htmltools::HTML(
         "Ref size: <i>", refsize, 
         "bp </i><br/>Run id:&nbsp&nbsp <i>", arg[2],
-        "</i><br/>Date:&nbsp&nbsp&nbsp&nbsp&nbsp <i>", format.POSIXct(Sys.time(), format = "%Y-%m-%d")
+        "</i><br/>Date:&nbsp&nbsp&nbsp&nbsp&nbsp <i>", format.POSIXct(Sys.time(), format = "%Y-%m-%d"), 
+        "<hr />"
         )
     ),
     # style = 'bootstrap',
-    escape = F, filter = 'top',
+    escape = F, #filter = 'top',
     extensions = 'Buttons', rownames = FALSE,
     options = list(
       searchHighlight = TRUE,

@@ -230,13 +230,7 @@ workflow {
     .join(COVERAGE_STATS.out.coverage_ch, by:0)
     .set { stats_ch }
 
-    //COVERAGE_STATS.out.coverage_ch
-    //.collect()
     stats_ch
-    //.flatten()
-    //.filter( ~/.*coverage.tsv/ )
-    //.collect()
-    //.view()
     | CONSENSUS_STATS
     
     CONSENSUS_STATS.out.spark_ch
