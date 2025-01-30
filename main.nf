@@ -102,9 +102,10 @@ process MEDAKA_CONSENSUS {
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
-    output: path("*consensus.fastq")
+    output: tuple val(sample), path("*consensus.fastq"), emit: consensus_ch
 
     script:
+    sample = fastq.simpleName
     """
     # fill gaps with N in consensus
     medaka_consensus -r N -q -i $fastq -d $ref 
@@ -118,7 +119,7 @@ process COVERAGE_STATS {
     //publishDir "$params.outdir", mode: 'copy'
 
     input: path(bam)
-    output: path("coverage.tsv"), emit: coverage_ch
+    output: tuple val(sample), path("coverage.tsv"), emit: coverage_ch
 
     script:
     sample = bam.simpleName
@@ -128,6 +129,7 @@ process COVERAGE_STATS {
     # determine sampling nth so that approx 300 points are collected for sparkline depth of coverage
     endpos=\$(samtools coverage -H ${bam} | cut -f3)
     nth=\$(awk -v var="\$endpos" 'BEGIN {print int(var / 300) }')
+    echo "nth: \$nth"
     
     samtools coverage -H ${bam} | awk '{print "$sample\t" \$0}' - > coverage
     samtools depth -aa ${bam} | awk -v var="\$nth" 'NR % var == 0' - | cut -f2,3 | tr '\n' '|' | tr '\t' ':' > depth
@@ -135,11 +137,32 @@ process COVERAGE_STATS {
     """
 }
 
+process CONSENSUS_STATS {
+    container 'pegi3s/biopython:latest'
+
+    input: tuple val(sample), path(consensus), path(coverage)
+    output: path("coverage2.tsv"), emit: spark_ch
+
+    script:
+    """
+    # convert consensus.fastq to phd and add to coverage.tsv
+    fastq2phd.py -i $consensus -o ${consensus.simpleName}.consensus.phd
+    cat ${consensus.simpleName}.consensus.phd | grep -v -e "BEGIN_*" -e "END*" > phd.file
+    
+    # determine sampling nth so that approx 300 points are collected for sparkline depth of coverage
+    endpos=\$(cat phd.file | wc -l | awk '\$1=\$1' -)
+    nth=\$(awk -v var="\$endpos" 'BEGIN {print int(var / 300) }')
+    
+    run-average.awk col=2 size=\$nth phd.file | awk -v var="\$nth" 'NR % var == 0' - | tr '\n' '|' > cons
+    paste -d "\t" $coverage cons > coverage2.tsv
+    """
+}
+
 process COVERAGE_SUMMARY {
     container 'aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir", mode: 'copy'
 
-    input:  path("coverage*.tsv")
+    input:  path("coverage2.tsv")
     output: path("00-alignment-summary*")
 
     script:
@@ -202,8 +225,21 @@ workflow {
     .filter( ~/.*bam$/ )
     //.view()
     | COVERAGE_STATS
+
+    MEDAKA_CONSENSUS.out.consensus_ch
+    .join(COVERAGE_STATS.out.coverage_ch, by:0)
+    .set { stats_ch }
+
+    //COVERAGE_STATS.out.coverage_ch
+    //.collect()
+    stats_ch
+    //.flatten()
+    //.filter( ~/.*coverage.tsv/ )
+    //.collect()
+    //.view()
+    | CONSENSUS_STATS
     
-    COVERAGE_STATS.out.coverage_ch
+    CONSENSUS_STATS.out.spark_ch
     .collect()
     //.view()
     | COVERAGE_SUMMARY
