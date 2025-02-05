@@ -152,8 +152,8 @@ process CONSENSUS_STATS {
     # determine sampling nth so that approx 300 points are collected for sparkline depth of coverage
     endpos=\$(cat phd.file | wc -l | awk '\$1=\$1' -)
     nth=\$(awk -v var="\$endpos" 'BEGIN {print int(var / 300) }')
-    
-    run-average.awk col=2 size=\$nth phd.file | awk -v var="\$nth" 'NR % var == 0' - | tr '\n' '|' > cons
+    # average cons q-score over 5 bases
+    run-average.awk col=2 size=10 phd.file | awk -v var="\$nth" 'NR % var == 0' - | tr '\n' '|' > cons
     paste -d "\t" $coverage cons > coverage2.tsv
     """
 }

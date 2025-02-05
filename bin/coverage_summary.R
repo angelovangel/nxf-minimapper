@@ -22,13 +22,13 @@ cols <- c(
 make_spk <- function(x,y) {
   sp1 <- sparkline(
     str_split(x, "\\|") %>% unlist() %>% head(-1),
-    width = 450, height = 43, lineColor = '#2b83ba', fillColor = "#d6eaf8", lineWidth = 2.0, chartRangeMin = 0,
-    tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> {{prefix}}pos: {{x}} depth: {{y}} {{suffix}}</span>"
+    width = 450, height = 43, lineColor = '#2972b6', fillColor = "#d6eaf8", lineWidth = 2.0, chartRangeMin = 0,
+    tooltipFormat = "&#9679; {{prefix}}pos: {{x}} <br><span style='color: {{color}}'>&#9679;</span> depth: {{y}} {{suffix}}</span>"
   )
   sp2 <- sparkline(
     str_split(y, "\\|") %>% unlist() %>% head(-1),
-    width = 450, height = 43, lineColor = '#d7191c', fillColor = FALSE, lineWidth = 2.0, chartRangeMin = 0,
-    tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> {{prefix}}pos: {{x}} cons_q: {{y}} {{suffix}}</span>"
+    width = 450, height = 43, lineColor = '#be1a25', fillColor = FALSE, lineWidth = 2.0, chartRangeMin = 0,
+    tooltipFormat = "<span style='color: {{color}}'>&#9679;</span> cons_q: {{y}} {{suffix}}</span>"
   )
   sl <- spk_composite(sp1, sp2)
   as.character(htmltools::as.tags(sl))
@@ -94,9 +94,9 @@ finaltable <-
   ) %>% 
   DT::formatRound('coverage', digits = 2) %>%
   DT::formatRound('meandepth', digits = 0, mark = "") %>%
-  DT::formatStyle('coverage', color = styleInterval(c(50, 80), c('#e74c3c', '#f5b041', '#1e8449'))) %>%
-  DT::formatStyle(c('meanbaseq', 'meandepth'), color = styleInterval(c(20, 25), c('#e74c3c', '#f5b041', '#1e8449'))) %>%
-  DT::formatStyle('meanmapq', color = styleInterval(c(40, 50), c('#e74c3c', '#f5b041', '#1e8449'))) %>%
+  DT::formatStyle('coverage', color = styleInterval(c(50, 80), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
+  DT::formatStyle(c('meanbaseq', 'meandepth'), color = styleInterval(c(20, 25), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
+  DT::formatStyle('meanmapq', color = styleInterval(c(40, 50), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
   spk_add_deps()
 
 #write.csv(df, file = '00-alignment-summary.tsv', sep = '\t', row.names = F, col.names = T)
