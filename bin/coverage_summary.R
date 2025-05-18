@@ -5,6 +5,8 @@
 
 # arg[1] is a pattern to list files
 # arg[2] is workflow id
+# arg[3] is git commit
+
 library(vroom)
 library(dplyr)
 library(DT)
@@ -70,14 +72,18 @@ finaltable <-
   DT::datatable(
     dplyr::arrange(df2, stringi::stri_rank(qname, opts_collator = locale)),
     class = 'row-border',
-    # caption = paste0("Run name: ", arg[2], " | Time: ", format.POSIXct(Sys.time())),
+    colnames = c(
+      'Query name',	'Ref name',	'Reads', 'Covered bases', 'Coverage',	'Mean depth',	'Mean base Q', 'Mean map Q', 'Coverage depth'
+    ),
     caption = htmltools::tags$caption(
       style = 'caption-side: top; text-align: left; color: grey;',
       htmltools::HTML(
-        "Ref size: <i>", refsize, 
-        "bp </i><br/>Run id:&nbsp&nbsp <i>", arg[2],
-        "</i><br/>Date:&nbsp&nbsp&nbsp&nbsp&nbsp <i>", format.POSIXct(Sys.time(), format = "%Y-%m-%d"), 
-        "<hr />"
+        format.POSIXct(Sys.time(), format = "%Y-%m-%d %H:%M:%S"), 
+        "<br/>
+        Ref size: <i>", refsize, "bp </i><br/>
+         Run id:&nbsp&nbsp <i>", arg[2],
+        "</i><br/>" 
+        #"<hr />"
         )
     ),
     # style = 'bootstrap',
@@ -99,5 +105,33 @@ finaltable <-
   DT::formatStyle('meanmapq', color = styleInterval(c(40, 50), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
   spk_add_deps()
 
-#write.csv(df, file = '00-alignment-summary.tsv', sep = '\t', row.names = F, col.names = T)
-DT::saveWidget(finaltable, file = '00-alignment-summary.html', title = "minimapper-summary")
+# Add Google Fonts link
+google_fonts <- htmltools::tags$link(
+  href = "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap",
+  rel = "stylesheet"
+)
+
+# Add a modern title with Google Fonts and Nerd Font
+intro_text <- htmltools::tags$div(
+  style = 'text-align: center; margin-bottom: 20px;',
+  htmltools::tags$h1(
+    style = 'font-size: 28px; color: #2972b6; margin: 0; font-family: "Roboto", "Hack Nerd Font", monospace;',
+    "Alignment Coverage and Quality Metrics" # Example Nerd Font icons
+  ),
+  htmltools::tags$p(
+    style = 'font-size: 16px; color: #7f8c8d; margin-top: 5px; font-family: "Roboto", sans-serif;',
+    "Report generated with the ",
+    htmltools::tags$a(
+      href = "https://github.com/angelovangel/nxf-minimapper",
+      target = "_blank",  # Opens the link in a new tab
+      style = 'color: #2980b9; text-decoration: none;',
+      "nxf-minimapper Nextflow pipeline", htmltools::tags$a("commit:", arg[3])
+    )
+  )
+)
+
+# Prepend the Google Fonts link and title to the table
+final_output <- htmlwidgets::prependContent(finaltable, google_fonts, intro_text)
+
+# Save the widget with the combined content
+DT::saveWidget(final_output, file = '00-alignment-summary.html', title = "Alignment Coverage Summary", selfcontained = TRUE)

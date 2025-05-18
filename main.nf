@@ -167,7 +167,8 @@ process COVERAGE_SUMMARY {
 
     script:
     """
-    coverage_summary.R "*.tsv" $workflow.runName
+    commit=\$(cat $workflow.projectDir/.git/logs/HEAD  | cut -f2 -d " " | tail -1 | cut -c-7)
+    coverage_summary.R "*.tsv" $workflow.runName \$commit
     """
 
 }
