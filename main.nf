@@ -131,9 +131,15 @@ process COVERAGE_STATS {
     nth=\$(awk -v var="\$endpos" 'BEGIN {print int(var / 300) }')
     echo "nth: \$nth"
     
-    samtools coverage -H ${bam} | awk '{print "$sample\t" \$0}' - > coverage
+    # get proper number of reads (primary) and mapped reads (primary mapped)
+    totalreads=\$(samtools flagstat ${bam} | grep 'primary\$' | cut -d" " -f1)
+    mappedreads=\$(samtools flagstat ${bam} | grep 'primary mapped' | cut -d" " -f1)
+
+    # columns are sample, ref, totalreads, mappedreads,
+    echo -e $sample'\t'\$totalreads'\t'\$mappedreads > stats
+    samtools coverage -H ${bam} > coverage
     samtools depth -aa ${bam} | awk -v var="\$nth" 'NR % var == 0' - | cut -f2,3 | tr '\n' '|' | tr '\t' ':' > depth
-    paste -d "\t" coverage depth > coverage.tsv
+    paste -d "\t" stats coverage depth > coverage.tsv
     """
 }
 

@@ -16,8 +16,11 @@ library(sparkline)
 arg <- commandArgs(trailingOnly = T)
 tsvfiles <- list.files(pattern = arg[1], full.names = T)
 
+# 14 columns
 cols <- c(
-    "qname", "rname", "startpos", "endpos", "numreads", "covbases", "coverage", "meandepth", "meanbaseq", "meanmapq", "cov_depth", "cons_qual" 
+    "qname", "totalreads", "mappedreads", 
+    "rname", "startpos", "endpos", "numreads", "covbases", "coverage", "meandepth", "meanbaseq", "meanmapq", 
+    "cov_depth", "cons_qual" 
 )
 # return a composite sparkline for coverage depth and consensus quality
 # x,y are the chr column with values
@@ -38,9 +41,10 @@ make_spk <- function(x,y) {
 
 df <- vroom(file = tsvfiles, delim = "\t", col_names = cols) #col_select = -c('startpos', 'endpos'))
 refsize <- df$endpos[1]
+refname <- df$rname[1]
 
 df2 <- df %>% 
-  dplyr::select(-c('startpos', 'endpos')) %>%
+  dplyr::select(-c('startpos', 'endpos', 'rname', 'numreads', 'covbases')) %>%
   group_by(qname) %>%
   mutate(
     cov_depth = make_spk(cov_depth, cons_qual)
@@ -73,16 +77,19 @@ finaltable <-
     dplyr::arrange(df2, stringi::stri_rank(qname, opts_collator = locale)),
     class = 'row-border',
     colnames = c(
-      'Query name',	'Ref name',	'Reads', 'Covered bases', 'Coverage',	'Mean depth',	'Mean base Q', 'Mean map Q', 'Coverage depth'
+      'Sample',	'Total reads',	'Mapped reads',
+      #'Alignments', 
+      #'Covered bases', 
+      'Coverage%',	'Mean depth',	'Mean base Q', 'Mean map Q', 'Coverage depth'
     ),
     caption = htmltools::tags$caption(
       style = 'caption-side: top; text-align: left; color: grey;',
       htmltools::HTML(
         format.POSIXct(Sys.time(), format = "%Y-%m-%d %H:%M:%S"), 
         "<br/>
-        Ref size: <i>", refsize, "bp </i><br/>
-         Run id:&nbsp&nbsp <i>", arg[2],
-        "</i><br/>" 
+        Ref name: <b>", refname, "</b><br/>
+        Ref size: &nbsp<b>", refsize, "bp </b><br/>
+        Run id:&nbsp&nbsp&nbsp&nbsp<b>", arg[2], "</b><br/><hr/>" 
         #"<hr />"
         )
     ),
@@ -95,11 +102,14 @@ finaltable <-
       autoWidth = TRUE, pageLength = 125,
       dom = 'Btp',
       paging = FALSE,
-      buttons = c('copy', 'csv', 'excel')
+      buttons = c('copy', 'csv', 'excel'),
+      columnDefs = list(list(width = '300px', targets = 7))
     )
   ) %>% 
-  DT::formatRound('coverage', digits = 2) %>%
+  DT::formatRound('coverage', digits = 0) %>%
   DT::formatRound('meandepth', digits = 0, mark = "") %>%
+  DT::formatRound('meanbaseq', digits = 0, mark = "") %>%
+  DT::formatRound('meanmapq', digits = 0, mark = "") %>%
   DT::formatStyle('coverage', color = styleInterval(c(50, 80), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
   DT::formatStyle(c('meanbaseq', 'meandepth'), color = styleInterval(c(20, 25), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
   DT::formatStyle('meanmapq', color = styleInterval(c(40, 50), c('#e74c3c', '#f5b041', '#2972b6'))) %>%
@@ -115,11 +125,11 @@ google_fonts <- htmltools::tags$link(
 intro_text <- htmltools::tags$div(
   style = 'text-align: center; margin-bottom: 20px;',
   htmltools::tags$h1(
-    style = 'font-size: 28px; color: #2972b6; margin: 0; font-family: "Roboto", "Hack Nerd Font", monospace;',
+    style = 'font-size: 24px; color: #2972b6; margin: 0; font-family: "Roboto", "Hack Nerd Font", monospace;',
     "Alignment Coverage and Quality Metrics" # Example Nerd Font icons
   ),
   htmltools::tags$p(
-    style = 'font-size: 16px; color: #7f8c8d; margin-top: 5px; font-family: "Roboto", sans-serif;',
+    style = 'font-size: 15px; color: #7f8c8d; margin-top: 5px; font-family: "Roboto", sans-serif;',
     "Report generated with the ",
     htmltools::tags$a(
       href = "https://github.com/angelovangel/nxf-minimapper",
