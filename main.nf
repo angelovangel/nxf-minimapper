@@ -85,7 +85,7 @@ process MINIMAP {
 
 process MEDAKA_VARIANT {
     container 'docker.io/ontresearch/medaka:latest'
-    containerOptions = "--user root" // fixes issue with non-matching uid in medaka container
+    containerOptions = "--user \$(id -u):\$(id -g)" // fixes issue with non-matching uid in medaka container
     publishDir "$params.outdir/02-variants/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
@@ -100,7 +100,7 @@ process MEDAKA_VARIANT {
 
 process MEDAKA_CONSENSUS {
     container 'docker.io/ontresearch/medaka:latest'
-    containerOptions = "--user root"
+    containerOptions = "--user \$(id -u):\$(id -g)"
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
