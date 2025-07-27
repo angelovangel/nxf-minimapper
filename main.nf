@@ -52,7 +52,7 @@ if ( myfile.isDirectory() ) {
 }
 
 process VALIDATE_REF {
-    container 'pegi3s/biopython:latest'
+    container 'docker.io/pegi3s/biopython:latest'
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: path(ref)
@@ -66,7 +66,7 @@ process VALIDATE_REF {
 
 
 process MINIMAP {
-    container 'aangeloo/nxf-tgs:latest'
+    container 'docker.io/aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
@@ -84,7 +84,7 @@ process MINIMAP {
 }
 
 process MEDAKA_VARIANT {
-    container 'ontresearch/medaka:latest'
+    container 'docker.io/ontresearch/medaka:latest'
     containerOptions = "--user root" // fixes issue with non-matching uid in medaka container
     publishDir "$params.outdir/02-variants/", mode: 'copy'
 
@@ -99,7 +99,7 @@ process MEDAKA_VARIANT {
 }
 
 process MEDAKA_CONSENSUS {
-    container 'ontresearch/medaka:latest'
+    container 'docker.io/ontresearch/medaka:latest'
     containerOptions = "--user root"
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
@@ -117,7 +117,7 @@ process MEDAKA_CONSENSUS {
 
 // get coverage statistics for all samples that were mapped to ref
 process COVERAGE_STATS {
-    container 'aangeloo/nxf-tgs:latest'
+    container 'docker.io/aangeloo/nxf-tgs:latest'
     //publishDir "$params.outdir", mode: 'copy'
 
     input: path(bam)
@@ -146,7 +146,7 @@ process COVERAGE_STATS {
 }
 
 process CONSENSUS_STATS {
-    container 'pegi3s/biopython:latest'
+    container 'docker.io/pegi3s/biopython:latest'
 
     input: tuple val(sample), path(consensus), path(coverage)
     output: path("coverage2.tsv"), emit: spark_ch
@@ -167,7 +167,7 @@ process CONSENSUS_STATS {
 }
 
 process COVERAGE_SUMMARY {
-    container 'aangeloo/nxf-tgs:latest'
+    container 'docker.io/aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir", mode: 'copy'
 
     input:  path("coverage2.tsv")
@@ -183,7 +183,7 @@ process COVERAGE_SUMMARY {
 
 
 process IGV {
-    container 'aangeloo/nxf-tgs:latest'
+    container 'docker.io/aangeloo/nxf-tgs:latest'
     publishDir "$params.outdir/01-igv-reports/", mode: 'copy'
     
     input: 
