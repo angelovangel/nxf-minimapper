@@ -92,8 +92,8 @@ process MEDAKA_VARIANT {
 
     script:
     """
-    medaka_variant -i $fastq -r $ref 
-    mv medaka/medaka.annotated.vcf ${fastq.simpleName}.variants.vcf
+    medaka_variant -i $fastq -r $ref -o .
+    mv medaka.annotated.vcf ${fastq.simpleName}.variants.vcf
     """
 }
 
@@ -108,8 +108,8 @@ process MEDAKA_CONSENSUS {
     sample = fastq.simpleName
     """
     # fill gaps with N in consensus
-    medaka_consensus -r N -q -i $fastq -d $ref 
-    mv medaka/consensus.fastq ${fastq.simpleName}.consensus.fastq
+    medaka_consensus -r N -q -i $fastq -d $ref -o .
+    mv consensus.fastq ${fastq.simpleName}.consensus.fastq
     """
 }
 
