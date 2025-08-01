@@ -185,7 +185,8 @@ process COVERAGE_SUMMARY {
 
 
 process IGV {
-    container 'docker.io/aangeloo/nxf-tgs:latest'
+    //container 'docker.io/aangeloo/nxf-tgs:latest'
+    container 'docker.io/aangeloo/igv-reports-image:latest'
     publishDir "$params.outdir/01-igv-reports/", mode: 'copy'
     
     input: 
@@ -204,7 +205,11 @@ process IGV {
     subsample=\$(echo \$count | awk '{if (\$1 <500) {print 1} else {print 500/\$1}}')
 
     # construct bed file
-    len=\$(faster2 -l ${ref})
+    # use samtools to get length of reference sequence
+    samtools faidx ${ref}
+    len=\$(awk '{print \$2}' ${ref}.fai | head -n 1)
+
+    # len=\$(faster2 -l ${ref})
     header=\$(grep ">" ${ref} | cut -c 2-)
     echo -e "\$header\t0\t\$len\tShowing \$subsample fraction of \$all_reads alignments" > bedfile.bed
 
