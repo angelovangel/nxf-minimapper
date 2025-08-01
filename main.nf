@@ -85,7 +85,8 @@ process MINIMAP {
 
 process MEDAKA_VARIANT {
     container 'docker.io/ontresearch/medaka:latest'
-    containerOptions = "--user \$(id -u):\$(id -g)" // fixes issue with non-matching uid in medaka container
+    label 'medaka'
+    //containerOptions = "--user \$(id -u):\$(id -g)" // fixes issue with non-matching uid in medaka container
     publishDir "$params.outdir/02-variants/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
@@ -100,7 +101,8 @@ process MEDAKA_VARIANT {
 
 process MEDAKA_CONSENSUS {
     container 'docker.io/ontresearch/medaka:latest'
-    containerOptions = "--user \$(id -u):\$(id -g)"
+    label 'medaka'
+    //containerOptions = "--user \$(id -u):\$(id -g)" // only in docker, do not use in singularity
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: tuple path(ref), path(fastq)
