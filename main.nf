@@ -56,11 +56,11 @@ process VALIDATE_REF {
     publishDir "$params.outdir/00-alignments/", mode: 'copy'
 
     input: path(ref)
-    output: path("${ref.simpleName}.reference.fasta"), emit: validated_ref_ch
+    output: path("${ref.simpleName}.fasta"), emit: validated_ref_ch
 
     script:
     """
-    convert2fasta.py $ref "${params.format}" ${ref.simpleName}.reference.fasta
+    convert2fasta.py $ref "${params.format}" ${ref.simpleName}.fasta
     """
 }
 
